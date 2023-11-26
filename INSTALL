@@ -1,0 +1,15 @@
+To install evilginx you will need golang and node.js. You may install them with the following as root/sudo/doas:
+
+$ pkg install go node
+
+After this you may run the following to build, install and clean:
+
+$ make install clean
+
+Now you should be able to run evilginx with the following:
+
+$ evilginx -p /usr/local/etc/evilginx/
+
+This installation comes with no phishlets, but you may clone https://github.com/An0nUD4Y/Evilginx2-Phishlets or others to /usr/local/etc/evilginx/ to use the phishlets you wish.
+
+Keep in mind that evilginx will need to run DNS on port 53. If you have your own DNS running on 53 you will need to stop it or configure it to run on another port, or in a jail.
